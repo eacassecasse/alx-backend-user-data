@@ -3,6 +3,7 @@
   <component name="ProjectModuleManager">
     <modules>
       <module fileurl="file://$PROJECT_DIR$/.idea/alx-backend-user-data.iml" filepath="$PROJECT_DIR$/.idea/alx-backend-user-data.iml" />
+      <module fileurl="file://$PROJECT_DIR$/../alx-interview/.idea/alx-interview.iml" filepath="$PROJECT_DIR$/../alx-interview/.idea/alx-interview.iml" />
     </modules>
   </component>
 </project>
