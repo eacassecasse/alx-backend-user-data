@@ -6,7 +6,10 @@ import os
 import re
 import mysql.connector
 
-
+patterns = {
+        'ext': lambda x, y: r'(?P<field>{})=[^{}]*'.format('|'.join(x), y),
+        'repl': lambda x: r'\g<field>={}'.format(x),
+    }
 PII_FIELDS = ('name', 'email', 'phone', 'ssn', 'password')
 
 
@@ -20,10 +23,6 @@ def filter_datum(fields, redaction, message, separator):
     :param separator: String by which fields in the message are separated
     :return: The obfuscated log message as a string
     """
-    patterns = {
-        'ext': lambda x, y: r'(?P<field>{})=[^{}]*'.format('|'.join(x), y),
-        'repl': lambda x: r'\g<field>={}'.format(x),
-    }
     ext, repl = (patterns["ext"], patterns["repl"])
     return re.sub(ext(fields, separator), repl(redaction), message)
 
