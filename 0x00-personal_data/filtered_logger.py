@@ -101,11 +101,10 @@ class RedactingFormatter(logging.Formatter):
         self.fields = fields
 
     def format(self, record: logging.LogRecord) -> str:
-        """
-        Formats a log record
-        """
+        """ Formats a log record """
         msg = super(RedactingFormatter, self).format(record)
-        return filter_datum(self.fields, self.REDACTION, msg, self.SEPARATOR)
+        dat = filter_datum(self.fields, self.REDACTION, msg, self.SEPARATOR)
+        return dat
 
 
 if __name__ == '__main__':
