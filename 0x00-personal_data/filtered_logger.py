@@ -20,17 +20,18 @@ def filter_datum(fields, redaction, message, separator):
     :param separator: String by which fields in the message are separated
     :return: The obfuscated log message as a string
     """
-    pattern = r'({})=([^{}]+)'.format(
-        '|'.join(map(re.escape, fields)),
-        re.escape(separator)
-    )
-    return re.sub(pattern, lambda m: f"{m.group(1)}={redaction}", message)
+    patterns = {
+        'ext': lambda x, y: r'(?P<field>{})=[^{}]*'.format('|'.join(x), y),
+        'repl': lambda x: r'\g<field>={}'.format(x),
+    }
+    ext, repl = (patterns["ext"], patterns["repl"])
+    return re.sub(ext(fields, separator), repl(redaction), message)
 
 
 def get_logger() -> logging.Logger:
     """
     Returns an INFO level logger with a StreamHandler.
-    :return:
+    :return: An INFO level logger with a StreamHandler
     """
     log = logging.getLogger("user_data")
     handler = logging.StreamHandler()
