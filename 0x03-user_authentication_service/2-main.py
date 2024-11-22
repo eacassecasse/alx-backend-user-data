@@ -12,19 +12,23 @@ from sqlalchemy.orm.exc import NoResultFound
 my_db = DB()
 
 user = my_db.add_user("test@test.com", "PwdHashed")
+print("Type of user is {}".format(type(user)))
 print(user.id)
 
 find_user = my_db.find_user_by(email="test@test.com")
+print("Type of find_user1 is {}".format(type(find_user)))
 print(find_user.id)
 
 try:
     find_user = my_db.find_user_by(email="test2@test.com")
+    print("Type of find_user2 is {}".format(type(find_user)))
     print(find_user.id)
 except NoResultFound:
     print("Not found")
 
 try:
     find_user = my_db.find_user_by(no_email="test@test.com")
+    print("Type of find_user3 is {}".format(type(find_user)))
     print(find_user.id)
 except InvalidRequestError:
     print("Invalid")
