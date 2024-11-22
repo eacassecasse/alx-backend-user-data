@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """DB module
 """
-from typing import Union, Type
+from typing import Optional
 
 from sqlalchemy import create_engine, tuple_
 from sqlalchemy.ext.declarative import declarative_base
@@ -50,7 +50,7 @@ class DB:
             user = None
         return user
 
-    def find_user_by(self, **kwargs) -> Type[User]:
+    def find_user_by(self, **kwargs) -> Optional[User]:
         """
         Finds a user using filters
         :param kwargs: The filters to search for in the database
