@@ -72,7 +72,7 @@ class DB:
 
         return user
 
-    def update_user(self, user_id, **kwargs):
+    def update_user(self, user_id: int, **kwargs):
         """
         Updates a user only if exists
         :param user_id: Integer representing the user id to update.

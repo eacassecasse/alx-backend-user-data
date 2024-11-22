@@ -7,35 +7,38 @@ app = Flask(__name__)
 AUTH = Auth()
 
 
-@app.route('/')
-def welcome():
+@app.route("/", methods=["GET"], strict_slashes=False)
+def index() -> str:
+    """
+    Renders the root route of the Flask API
+    :return: A JSON string `{"message": "Bienvenue"}`
+    """
     return jsonify({'message': 'Bienvenue'})
 
 
-@app.post('/users')
-def users():
+@app.route("/users", methods=["POST"], strict_slashes=False)
+def users() -> str:
+    """
+    Renders the POST /users route of the Flask API
+    :return: A JSON payload containing the new user information
+    """
+    email = request.form.get('email')
+    password = request.form.get('password')
     try:
-        data = request.form
-        if not data or not data['email'] or not data['password']:
-            return jsonify({'error': 'email and password are required'}), 400
-
-        email = data['email']
-        password = data['password']
-        user = AUTH.register_user(email, password)
-        return jsonify({'email': user.email, 'message': 'user created'})
+        AUTH.register_user(email, password)
+        return jsonify({'email': email, 'message': 'user created'})
     except ValueError:
         return jsonify({'message': 'email already registered'}), 400
 
 
-@app.post('/sessions')
+@app.route("/sessions", methods=["POST"], strict_slashes=False)
 def login():
-    data = request.form
-    if not data or not data['email'] or not data['password']:
-        return make_response(
-            jsonify({'error': 'email and password are required'}), 400)
-
-    email = data['email']
-    password = data['password']
+    """
+    Renders the POST /sessions route of the Flask API
+    :return: The response payload with a session cookie.
+    """
+    email = request.form.get('email')
+    password = request.form.get('password')
 
     if not AUTH.valid_login(email, password):
         abort(401)
@@ -45,75 +48,73 @@ def login():
     return response
 
 
-@app.delete('/sessions')
-def logout():
-    if not request.cookies.get('session_id'):
-        abort(403)
-
+@app.route("/sessions", methods=["DELETE"], strict_slashes=False)
+def logout() -> str:
+    """
+    Renders the DELETE /sessions route of the Flask API
+    :return: A redirection to the root route.
+    """
     session_id = request.cookies.get('session_id')
     user = AUTH.get_user_from_session_id(session_id)
-
-    if not user:
+    if user is None:
         abort(403)
-
     AUTH.destroy_session(user.id)
-    return redirect('/')
+    return redirect("/")
 
 
-@app.get('/profile')
-def profile():
-    if not request.cookies.get('session_id'):
-        abort(403)
-
+@app.route("/profile", methods=["GET"], strict_slashes=False)
+def profile() -> str:
+    """
+    Renders the GET /profile route of the Flask API
+    :return: A JSON payload with the profile information
+    """
     session_id = request.cookies.get('session_id')
     user = AUTH.get_user_from_session_id(session_id)
 
-    if user:
-        return jsonify(
-            {'email': user.email}
-        ), 200
-    else:
+    if user is None:
         abort(403)
 
+    return jsonify({'email': user.email})
 
-@app.post('/reset_password')
-def get_reset_password_token():
+
+@app.route("/reset_password", methods=["POST"], strict_slashes=False)
+def get_reset_password_token() -> str:
+    """
+    Renders the POST /reset_password route of the Flask API.
+    :return: A JSON payload with the reset token.
+    """
+    email = request.form.get('email')
+    reset_token = None
     try:
-        data = request.form
-        if not data or not data['email']:
-            return jsonify({'error': 'email is required'}), 400
-
-        email = data['email']
         reset_token = AUTH.get_reset_password_token(email)
-        return jsonify({'email': email, 'reset_token': reset_token}), 200
     except ValueError:
+        reset_token = None
+    if reset_token is None:
         abort(403)
+    return jsonify({'email': email, 'reset_token': reset_token})
 
 
-@app.put('/reset_password')
-def update_password():
-    data = request.form
-    if not data or not data['email'] or not data['reset_token'] \
-            or not data['new_password']:
-        return jsonify(
-            {'error': 'email, reset_token and new_password are required'}
-        ), 400
-
-    email = data['email']
-    reset_token = data['reset_token']
-    new_password = data['new_password']
-    updated = False
+@app.route("/reset_password", methods=["PUT"], strict_slashes=False)
+def update_password() -> str:
+    """
+    Renders the PUT /reset_password route of the Flask API.
+    :return: A JSON payload informing the password was updated.
+    """
+    email = request.form.get('email')
+    reset_token = request.form.get('reset_token')
+    new_password = request.form.get('new_password')
+    has_changed = False
 
     try:
         AUTH.update_password(reset_token, new_password)
-        updated = True
+        has_changed = True
     except ValueError:
-        updated = False
+        has_changed = False
 
-    if not updated:
+    if not has_changed:
         abort(403)
 
-    return jsonify({'email': email, 'message': 'Password updated'}), 200
+    return jsonify({'email': email, 'message': 'Password updated'})
 
 
 if __name__ == '__main__':
