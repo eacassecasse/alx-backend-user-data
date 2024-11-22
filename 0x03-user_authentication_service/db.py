@@ -48,7 +48,7 @@ class DB:
             user = None
         return user
 
-    def find_user_by(self, **kwargs):
+    def find_user_by(self, **kwargs) -> [User]:
         """
         Finds a user using filters
         :param kwargs: The filters to search for in the database
@@ -72,7 +72,7 @@ class DB:
 
         return user
 
-    def update_user(self, user_id: int, **kwargs):
+    def update_user(self, user_id: int, **kwargs) -> None:
         """
         Updates a user only if exists
         :param user_id: Integer representing the user id to update.

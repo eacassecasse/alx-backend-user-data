@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """ This module defines a basic Flask application. """
-from flask import Flask, jsonify, request, abort, make_response, redirect
+from flask import Flask, jsonify, request, abort, redirect
 from auth import Auth
 
 app = Flask(__name__)
