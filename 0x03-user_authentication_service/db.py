@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """DB module
 """
-from sqlalchemy import create_engine, and_
+from sqlalchemy import create_engine, tuple_
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.orm.session import Session
@@ -54,17 +54,20 @@ class DB:
         :param kwargs: The filters to search for in the database
         :return: A user or none if not found
         """
-        filters = []
+        fields = []
+        values = []
 
         for key, value in kwargs.items():
             if not hasattr(User, key):
                 raise InvalidRequestError()
-            filters.append(getattr(User, key) == value)
+            fields.append(getattr(User, key))
+            values.append(value)
 
-        res = self._session.query(User).filter(and_(*filters))
-        user = res.one_or_none()
+        user = self._session.query(User).filter(
+            tuple_(*fields).in_([tuple(values)])
+        ).first()
 
-        if not user:
+        if user is None:
             raise NoResultFound()
 
         return user
@@ -77,13 +80,18 @@ class DB:
         :return: None
         """
         try:
-            user = self.find_user_by(**{'id': user_id})
-            if user is not None:
-                for k, v in kwargs.items():
-                    if not hasattr(user, k):
-                        raise ValueError()
-                    setattr(user, k, v)
-                self._session.commit()
+            user = self.find_user_by(id=user_id)
+            if user is None:
+                return
+            source = {}
+            for k, v in kwargs.items():
+                if not hasattr(user, k):
+                    raise ValueError()
+                source[getattr(User, k)] = v
+            self._session.query(User).filter(User.id == user_id).update(
+                source, synchronize_session=False
+            )
+            self._session.commit()
         except NoResultFound:
             return
-        return None
+        return
