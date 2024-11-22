@@ -69,7 +69,7 @@ class Auth:
             return False
         return False
 
-    def create_session(self, email: str)-> str:
+    def create_session(self, email: str) -> str:
         """
         Creates a new session for a user identified by an email.
         :param email: The current user email
