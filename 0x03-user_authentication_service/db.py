@@ -1,6 +1,8 @@
 #!/usr/bin/env python3
 """DB module
 """
+from typing import Union
+
 from sqlalchemy import create_engine, tuple_
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
@@ -48,7 +50,7 @@ class DB:
             user = None
         return user
 
-    def find_user_by(self, **kwargs) -> [User]:
+    def find_user_by(self, **kwargs) -> Union[User, None]:
         """
         Finds a user using filters
         :param kwargs: The filters to search for in the database
